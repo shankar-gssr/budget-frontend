@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FinSet — Budget</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f5f5f5; --surface:#ffffff; --ink:#0d0d0d; --ink-2:#444; --ink-3:#888;
+  --border:#e8e8e8; --pill-bg:#f0f0f0; --active-bg:#0d0d0d; --active-fg:#fff;
+  --ring-track:#e5e5e5; --ring-fill:#0d0d0d; --warn:#e85d2f; --green:#1a8a5a;
+  --shadow:0 2px 16px rgba(0,0,0,.06); --shadow-md:0 4px 28px rgba(0,0,0,.09);
+  --r:16px; --r-sm:10px; --font-d:'Syne',sans-serif; --font-b:'Outfit',sans-serif;
+  --sidebar-w:220px; --right-w:340px;
+}
+[data-theme="dark"] {
+  --bg:#111; --surface:#1c1c1c; --ink:#f0f0f0; --ink-2:#b0b0b0; --ink-3:#666;
+  --border:#2e2e2e; --pill-bg:#252525; --active-bg:#f0f0f0; --active-fg:#111;
+  --ring-track:#333; --ring-fill:#f0f0f0;
+  --shadow:0 2px 16px rgba(0,0,0,.3); --shadow-md:0 4px 28px rgba(0,0,0,.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;}
+body{font-family:var(--font-b);background:var(--bg);color:var(--ink);display:flex;min-height:100vh;transition:background .3s,color .3s;}
+button{cursor:pointer;font-family:var(--font-b);}
+svg{display:block;flex-shrink:0;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:22px 0;position:sticky;top:0;height:100vh;flex-shrink:0;transition:background .3s,border-color .3s;overflow:hidden;}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:0 20px 28px;font-family:var(--font-d);font-size:1.25rem;font-weight:700;color:var(--ink);}
+.logo-mark{width:40px;height:40px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--surface);font-family:var(--font-d);font-size:1.1rem;font-weight:800;flex-shrink:0;transition:background .3s,color .3s;}
+.nav-section{flex:1;padding:0 12px;overflow-y:auto;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-sm);font-size:.88rem;font-weight:500;color:var(--ink-2);text-decoration:none;transition:background .15s,color .15s;cursor:pointer;border:none;background:none;width:100%;text-align:left;margin-bottom:2px;}
+.nav-item:hover{background:var(--pill-bg);color:var(--ink);}
+.nav-item.active{background:var(--active-bg);color:var(--active-fg);}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;}
+.nav-divider{height:1px;background:var(--border);margin:10px 0;}
+.sidebar-bottom{padding:0 12px;margin-top:auto;}
+.theme-toggle{display:flex;align-items:center;gap:6px;padding:8px 12px;margin-top:12px;}
+.theme-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:none;display:flex;align-items:center;justify-content:center;color:var(--ink-3);transition:all .15s;}
+.theme-btn.active,.theme-btn:hover{background:var(--pill-bg);color:var(--ink);}
+
+/* MAIN */
+.main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0;}
+
+/* TOPBAR */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:70px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:10;transition:background .3s,border-color .3s;}
+.topbar-title h1{font-family:var(--font-d);font-size:1.55rem;font-weight:800;color:var(--ink);line-height:1.1;}
+.topbar-title p{font-size:.77rem;color:var(--ink-3);margin-top:1px;}
+.topbar-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:none;display:flex;align-items:center;justify-content:center;color:var(--ink-2);transition:all .15s;position:relative;}
+.icon-btn:hover{background:var(--pill-bg);color:var(--ink);}
+.icon-btn svg{width:17px;height:17px;}
+.notif-badge{position:absolute;top:2px;right:2px;width:16px;height:16px;background:var(--ink);color:var(--surface);border-radius:50%;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface);}
+.user-chip{display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;border:1px solid var(--border);border-radius:40px;background:none;cursor:pointer;transition:background .15s;}
+.user-chip:hover{background:var(--pill-bg);}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#c8c0b8,#a09080);overflow:hidden;flex-shrink:0;}
+.user-info{text-align:left;}
+.user-name{font-size:.8rem;font-weight:600;color:var(--ink);line-height:1.2;}
+.user-email{font-size:.7rem;color:var(--ink-3);}
+
+/* CONTENT */
+.content-area{display:flex;flex:1;min-height:0;}
+.content-main{flex:1;padding:22px 22px 32px;min-width:0;overflow-y:auto;}
+.right-panel{width:var(--right-w);flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);padding:22px 18px;overflow-y:auto;transition:background .3s,border-color .3s;}
+
+/* FILTER BAR */
+.filter-bar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.filter-pill{display:flex;align-items:center;gap:5px;padding:7px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);font-size:.8rem;font-weight:500;color:var(--ink-2);transition:all .15s;}
+.filter-pill:hover{border-color:var(--ink-3);color:var(--ink);}
+.filter-pill svg{width:12px;height:12px;}
+.filter-icon-btn{width:36px;height:36px;border:1px solid var(--border);border-radius:8px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--ink-2);transition:all .15s;}
+.filter-icon-btn:hover{border-color:var(--ink-3);color:var(--ink);}
+.filter-icon-btn svg{width:15px;height:15px;}
+.btn-add{margin-left:auto;display:flex;align-items:center;gap:6px;padding:9px 18px;background:var(--ink);color:var(--surface);border:none;border-radius:10px;font-size:.84rem;font-weight:600;font-family:var(--font-b);transition:opacity .15s,transform .15s;}
+.btn-add:hover{opacity:.85;transform:translateY(-1px);}
+.btn-add svg{width:14px;height:14px;}
+.filter-bar-2{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.reset-btn{display:flex;align-items:center;gap:5px;padding:7px 10px;border:none;background:none;font-size:.8rem;color:var(--ink-3);font-family:var(--font-b);transition:color .15s;}
+.reset-btn:hover{color:var(--ink);}
+.reset-btn svg{width:13px;height:13px;}
+.items-count{font-size:.8rem;color:var(--ink-3);margin-bottom:14px;}
+
+/* CARDS GRID */
+.cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+.budget-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;transition:box-shadow .2s,background .3s,border-color .3s;animation:cardIn .45s ease both;}
+.budget-card:hover{box-shadow:var(--shadow-md);}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.budget-card:nth-child(1){animation-delay:.04s;}
+.budget-card:nth-child(2){animation-delay:.09s;}
+.budget-card:nth-child(3){animation-delay:.14s;}
+.budget-card:nth-child(4){animation-delay:.19s;}
+.budget-card:nth-child(5){animation-delay:.24s;}
+.budget-card:nth-child(6){animation-delay:.29s;}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.card-title{font-family:var(--font-d);font-size:.95rem;font-weight:700;color:var(--ink);}
+.edit-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:none;display:flex;align-items:center;justify-content:center;color:var(--ink-3);transition:all .15s;}
+.edit-btn:hover{background:var(--pill-bg);color:var(--ink);}
+.edit-btn svg{width:12px;height:12px;}
+.card-body{display:flex;align-items:center;gap:16px;}
+.ring-wrap{position:relative;flex-shrink:0;}
+.ring-wrap svg{transform:rotate(-90deg);}
+.ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none;}
+.ring-pct{font-size:.62rem;color:var(--ink-3);font-weight:500;line-height:1;margin-bottom:2px;}
+.ring-amt{font-family:var(--font-d);font-size:.7rem;font-weight:700;color:var(--ink);line-height:1;}
+.ring-cents{font-size:.52rem;color:var(--ink-3);}
+.card-info{flex:1;min-width:0;}
+.info-label{font-size:.7rem;color:var(--ink-3);font-weight:400;margin-bottom:1px;}
+.info-amount{font-family:var(--font-d);font-size:1.4rem;font-weight:700;color:var(--ink);line-height:1.1;}
+.info-amount .cents{font-size:.85rem;color:var(--ink-3);font-weight:400;}
+.info-total{font-size:.73rem;color:var(--ink-3);margin-left:1px;}
+.status-badge{display:inline-flex;align-items:center;gap:4px;margin-top:9px;padding:4px 10px;border:1px solid var(--border);border-radius:20px;font-size:.7rem;font-weight:500;color:var(--ink-2);}
+.status-badge svg{width:11px;height:11px;}
+.status-badge.warn{border-color:#f8c6b5;background:#fef3ef;color:var(--warn);}
+[data-theme="dark"] .status-badge.warn{background:rgba(232,93,47,.12);border-color:rgba(232,93,47,.3);}
+
+/* RIGHT PANEL */
+.panel-section{margin-bottom:26px;}
+.panel-section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.panel-section-title{font-family:var(--font-d);font-size:1rem;font-weight:700;color:var(--ink);}
+.dots-btn{border:none;background:none;color:var(--ink-3);display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;transition:background .15s;}
+.dots-btn:hover{background:var(--pill-bg);color:var(--ink);}
+.monthly-amount{font-family:var(--font-d);font-size:2.1rem;font-weight:800;color:var(--ink);line-height:1;margin-bottom:6px;}
+.monthly-amount .cents{font-size:1.1rem;color:var(--ink-3);font-weight:400;}
+.on-track-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid var(--border);border-radius:20px;font-size:.73rem;font-weight:500;color:var(--green);margin-bottom:18px;}
+.on-track-badge svg{width:12px;height:12px;}
+.donut-wrap{position:relative;width:176px;height:176px;margin:0 auto 6px;}
+.donut-wrap svg{transform:rotate(-225deg);}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none;}
+.donut-pct{font-size:.73rem;color:var(--ink-3);font-weight:500;margin-bottom:2px;}
+.donut-main{font-family:var(--font-d);font-size:1.4rem;font-weight:800;color:var(--ink);line-height:1.1;}
+.donut-main .dc{font-size:.85rem;color:var(--ink-3);font-weight:400;}
+.donut-callout{position:absolute;top:12px;right:-10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 8px;font-size:.67rem;color:var(--ink-2);line-height:1.4;box-shadow:var(--shadow);white-space:nowrap;}
+.donut-callout strong{color:var(--ink);font-weight:700;display:block;}
+.callout-dot{position:absolute;left:-4px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--ink);border-radius:50%;border:2px solid var(--surface);}
+.month-pill{display:flex;align-items:center;gap:4px;padding:5px 10px;border:1px solid var(--border);border-radius:8px;background:none;font-size:.73rem;font-weight:500;color:var(--ink-2);font-family:var(--font-b);transition:all .15s;}
+.month-pill:hover{background:var(--pill-bg);color:var(--ink);}
+.month-pill svg{width:11px;height:11px;}
+.expense-list{display:flex;flex-direction:column;gap:1px;}
+.expense-item{display:flex;align-items:center;gap:10px;padding:7px 5px;border-radius:8px;transition:background .15s;}
+.expense-item:hover{background:var(--pill-bg);}
+.expense-icon{width:32px;height:32px;background:var(--pill-bg);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--ink-2);}
+.expense-icon svg{width:15px;height:15px;}
+.expense-info{flex:1;min-width:0;}
+.expense-amount{font-family:var(--font-d);font-size:.88rem;font-weight:700;color:var(--ink);line-height:1.1;}
+.expense-name{font-size:.7rem;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.expense-change{font-size:.7rem;font-weight:600;display:flex;align-items:center;gap:2px;padding:3px 7px;border-radius:6px;background:var(--pill-bg);white-space:nowrap;color:var(--ink-2);}
+.panel-anim{animation:fadeUp .5s ease .1s both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+@media(max-width:1200px){:root{--right-w:300px;}}
+@media(max-width:960px){.right-panel{display:none;}.cards-grid{grid-template-columns:1fr;}}
+@media(max-width:640px){.sidebar{display:none;}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">F</div>
+    FinSet
+  </div>
+  <nav class="nav-section">
+    <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Transactions</a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4"/><path d="M2 13v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6"/><line x1="2" y1="11" x2="22" y2="11"/></svg>Wallet</a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>Goals</a>
+    <a class="nav-item active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Budget</a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07"/></svg>Settings</a>
+    <div class="nav-divider"></div>
+    <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Help</a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Log out</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="theme-toggle">
+      <button class="theme-btn active" id="lightBtn" onclick="setTheme('light')" title="Light">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+      </button>
+      <button class="theme-btn" id="darkBtn" onclick="setTheme('dark')" title="Dark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN WRAPPER -->
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="topbar-title">
+      <h1>Budget</h1>
+      <p>Create and track your budgets</p>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+      <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-badge">3</span></button>
+      <button class="user-chip">
+        <div class="avatar"><svg viewBox="0 0 32 32" width="32" height="32"><rect width="32" height="32" fill="#c8c0b8"/><circle cx="16" cy="12" r="6" fill="#a09080"/><path d="M4 28c0-6.627 5.373-12 12-12s12 5.373 12 12" fill="#a09080"/></svg></div>
+        <div class="user-info"><div class="user-name">Adeline Lively</div><div class="user-email">adeline@email.com</div></div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="color:var(--ink-3)"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="content-area">
+    <main class="content-main">
+      <!-- Filter row 1 -->
+      <div class="filter-bar">
+        <button class="filter-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+        <button class="filter-pill">This month <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <button class="filter-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="5 12 12 5 19 12"/></svg></button>
+        <button class="filter-pill">Sort by: Default <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <button class="filter-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg></button>
+        <button class="btn-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add new budget</button>
+      </div>
+      <!-- Filter row 2 -->
+      <div class="filter-bar-2">
+        <button class="filter-pill">Status <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <button class="filter-pill">Amount <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <button class="reset-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Reset all</button>
+      </div>
+      <p class="items-count">6 items</p>
+      <div class="cards-grid" id="cardsGrid"></div>
+    </main>
+
+    <!-- RIGHT PANEL -->
+    <aside class="right-panel">
+      <div class="panel-section panel-anim">
+        <div class="panel-section-header">
+          <span class="panel-section-title">Monthly budget</span>
+          <button class="dots-btn"><svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+        </div>
+        <div class="monthly-amount">$5,950<span class="cents">.00</span></div>
+        <div class="on-track-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          On track
+        </div>
+        <div class="donut-wrap">
+          <svg width="176" height="176" viewBox="0 0 176 176">
+            <circle cx="88" cy="88" r="70" fill="none" stroke="var(--ring-track)" stroke-width="13" stroke-dasharray="329.9" stroke-dashoffset="0"/>
+            <circle cx="88" cy="88" r="70" fill="none" stroke="var(--ring-fill)" stroke-width="13"
+              stroke-linecap="round"
+              stroke-dasharray="329.9 439.8"
+              stroke-dashoffset="329.9"
+              id="donutArc"
+            />
+          </svg>
+          <div class="donut-center">
+            <span class="donut-pct">45% spent</span>
+            <span class="donut-main">$2,693<span class="dc">.00</span></span>
+          </div>
+          <div class="donut-callout">
+            <span class="callout-dot"></span>
+            <strong>55% left</strong>$3,257
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section panel-anim" style="animation-delay:.18s">
+        <div class="panel-section-header">
+          <span class="panel-section-title">Most expenses</span>
+          <button class="month-pill">This month <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+        </div>
+        <div class="expense-list" id="expenseList"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+const budgets=[
+  {title:"Food & Groceries",   pct:74, spent:487.50, left:162.50,  total:650,  warn:false},
+  {title:"Cafe & Restaurants", pct:45, spent:1270.00,left:830.00,  total:2100, warn:false},
+  {title:"Health & Beauty",    pct:47, spent:235.50, left:264.50,  total:500,  warn:false},
+  {title:"Traveling",          pct:88, spent:350.00, left:50.00,   total:400,  warn:true},
+  {title:"Investments",        pct:25, spent:200.00, left:600.00,  total:800,  warn:false},
+  {title:"Entertainment",      pct:10, spent:150.00, left:1350.00, total:1500, warn:false},
+];
+const expenses=[
+  {name:"Money transfer",     amt:2500, ch:"+15.5%", up:true,  ico:"M2 9V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4M2 13v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6M2 11h20"},
+  {name:"Cafe & Restaurants", amt:1270, ch:"+10.2%", up:true,  ico:"M17 8h1a4 4 0 0 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4ZM6 2v2M10 2v2M14 2v2"},
+  {name:"Rent",               amt:1050, ch:"+1.5%",  up:true,  ico:"M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10"},
+  {name:"Education",          amt:650,  ch:"+6.2%",  up:true,  ico:"M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"},
+  {name:"Food & Groceries",   amt:487,  ch:"+5.5%",  up:true,  ico:"M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"},
+  {name:"Traveling",          amt:350,  ch:"+3.0%",  up:true,  ico:"M17.8 19.2 16 11l3.5-3.5C21 6 21 4 19 2c-2-2-4-2-5.5-.5L10 5 1.8 6.2c-.5.1-.9.5-.9 1.1 0 .3.2.7.4 1l4.5 4.5M5 12-2 2 2 2M12 18l2 2-2 2"},
+  {name:"Health & Beauty",    amt:235,  ch:"-25.3%", up:false, ico:"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"},
+];
+
+function fmt(n){const[w,d]=n.toFixed(2).split('.');return{w:'$'+parseInt(w).toLocaleString(),d:'.'+d};}
+
+function makeCard(b){
+  const r=40,C=2*Math.PI*r,filled=C*(b.pct/100),gap=C-filled,sz=(r+12)*2,cx=sz/2;
+  const lf=fmt(b.left),sp=fmt(b.spent);
+  return `<div class="budget-card">
+    <div class="card-header"><span class="card-title">${b.title}</span>
+    <button class="edit-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></div>
+    <div class="card-body">
+      <div class="ring-wrap">
+        <svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}">
+          <circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="var(--ring-track)" stroke-width="8"/>
+          <circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="var(--ring-fill)" stroke-width="8" stroke-linecap="round"
+            stroke-dasharray="0 ${C}" data-f="${filled}" data-g="${gap}" class="ring-arc"/>
+        </svg>
+        <div class="ring-label"><span class="ring-pct">${b.pct}% spent</span><span class="ring-amt">${sp.w}<span class="ring-cents">${sp.d}</span></span></div>
+      </div>
+      <div class="card-info">
+        <div class="info-label">Left</div>
+        <div class="info-amount">${lf.w}<span class="cents">${lf.d}</span><span class="info-total">/$${b.total.toLocaleString()}</span></div>
+        <div class="status-badge${b.warn?' warn':''}">
+          ${b.warn
+            ?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Need attention'
+            :'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> On track'}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function makeExpense(e){
+  const arrow=e.up
+    ?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="9" height="9"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>'
+    :'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="9" height="9"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="5 12 12 19 19 12"/></svg>';
+  return `<div class="expense-item">
+    <div class="expense-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${e.ico}"/></svg></div>
+    <div class="expense-info"><div class="expense-amount">$${e.amt.toLocaleString()}</div><div class="expense-name">${e.name}</div></div>
+    <div class="expense-change">${arrow}${e.ch}</div>
+  </div>`;
+}
+
+document.getElementById('cardsGrid').innerHTML=budgets.map(makeCard).join('');
+document.getElementById('expenseList').innerHTML=expenses.map(makeExpense).join('');
+
+// Animate rings
+function animateRings(){
+  document.querySelectorAll('.ring-arc').forEach((a,i)=>{
+    setTimeout(()=>{
+      a.style.transition='stroke-dasharray 1s cubic-bezier(0.4,0,0.2,1)';
+      a.setAttribute('stroke-dasharray',`${a.dataset.f} ${a.dataset.g}`);
+    },80+i*55);
+  });
+}
+
+// Animate donut — 75° sweep track, 45% filled
+function animateDonut(){
+  const arc=document.getElementById('donutArc');
+  const r=70, C=2*Math.PI*r; // ≈439.8
+  const track=C*0.75;  // ≈329.9
+  const filled=track*0.45; // ≈148.4
+  // dasharray: track gap=(C-track)
+  // dashoffset: offset so arc starts at correct spot; filled part shows
+  // We set dasharray=[filled, C-filled], dashoffset=track-filled + (C-track)
+  arc.setAttribute('stroke-dasharray',`0 ${C}`);
+  setTimeout(()=>{
+    arc.style.transition='stroke-dasharray 1.3s cubic-bezier(0.4,0,0.2,1)';
+    arc.setAttribute('stroke-dasharray',`${filled} ${C-filled}`);
+  },250);
+}
+
+setTimeout(animateRings,120);
+setTimeout(animateDonut,150);
+
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('lightBtn').classList.toggle('active',t==='light');
+  document.getElementById('darkBtn').classList.toggle('active',t==='dark');
+  // reset and re-animate rings
+  document.querySelectorAll('.ring-arc').forEach(a=>{
+    a.style.transition='none';
+    a.setAttribute('stroke-dasharray',`0 ${parseFloat(a.dataset.f)+parseFloat(a.dataset.g)}`);
+  });
+  const da=document.getElementById('donutArc');
+  da.style.transition='none';
+  da.setAttribute('stroke-dasharray','0 439.8');
+  setTimeout(()=>{animateRings();animateDonut();},50);
+}
+</script>
+</body>
+</html>
